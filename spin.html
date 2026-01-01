@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spin & Win!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Green Tinted Background */
+            background: linear-gradient(135deg, #bbdb72 0%, #78ffd6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Full Screen Start Overlay */
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: #43e97b;
+            color: white;
+            padding: 20px 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(67, 233, 123, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #f5f5dc;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5cc780 0%, #96f1e1 100%);
+            padding: 5px 10px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .company-logo {
+            width: 270px;
+            height: auto;
+            margin-bottom: 15px;
+            display: block; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header::before {
+            content: '✨';
+            left:80px;
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.2;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header::after {
+            content: '🎁';
+            position: absolute;
+            right: 70px;
+            font-size: 60px;
+            opacity: 0.3;
+            animation: float 2s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(25px); }
+            50% { transform: translateY(-50px); }
+        }
+
+        .header h1 {
+            font-size: clamp(24px, 5vw, 36px);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: clamp(14px, 3vw, 18px);
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px 20px;
+        }
+
+        /* Form Styles */
+        .form-container {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: clamp(16px, 3vw, 18px);
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #43e97b;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 233, 123, 0.1);
+        }
+
+        /* Radio Button Styles */
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 5px;
+            font-size: clamp(11px, 2.5vw, 14px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 100%;
+            color: #555;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            background: #e8f5e9;
+            border-color: #43e97b;
+            color: #2e7d32;
+            box-shadow: 0 4px 10px rgba(67, 233, 123, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .radio-option label:hover {
+            border-color: #43e97b;
+        }
+
+        .error-message {
+            color: #f5576c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: clamp(18px, 3vw, 22px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(67, 233, 123, 0.4);
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(67, 233, 123, 0.5);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Wheel Container */
+        .wheel-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+            text-align: center;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: min(450px, 90vw);
+            height: min(450px, 90vw);
+            margin: 0 auto 30px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-size: 60px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        #spinWheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 12px solid white;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: clamp(20px, 4vw, 26px);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(67, 233, 123, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(67, 233, 123, 0.5);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        /* Result Modal */
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: popIn 0.5s ease;
+            position: relative;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-emoji {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .result-title {
+            font-size: clamp(24px, 5vw, 32px);
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .result-prize {
+            font-size: clamp(20px, 4vw, 26px);
+            color: #43e97b;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(67, 233, 123, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 233, 123, 0.5);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f093fb;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #43e97b;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="startOverlay" class="start-overlay">
+        <h1>Welcome to Spin & Win!</h1>
+        <p>Click below to enter full screen and start.</p>
+        <button id="startBtn" class="start-btn">ENTER GAME 🚀</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <a href="index.html" style="position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 24px; z-index: 10;">🏠</a>
+            <img src="images/company-logo.png" alt="Company Logo" class="company-logo">
+            <h1>🎯 Spin & Win Maamis Masala!!</h1>
+            <p>Let's try your luck!</p>
+        </div>
+
+        <div class="content">
+            <div class="form-container" id="formContainer">
+                <form id="participantForm">
+                    <div class="form-group">
+                        <label for="phone">📱Enter Your Mobile Number*</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            placeholder="Enter 10-digit number"
+                            inputmode="numeric"
+                            maxlength="10"
+                            required
+                        >
+                        <div class="error-message" id="phoneError">Please enter a valid 10-digit phone number</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>👤 I am a *</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="cat_consumer" name="category" value="consumer" required>
+                                <label for="cat_consumer">Consumer</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cat_agent" name="category" value="agent">
+                                <label for="cat_agent">Agent / Distributor</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cat_rest" name="category" value="restaurant">
+                                <label for="cat_rest">Restaurant Owner</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cat_shop" name="category" value="Shop">
+                                <label for="cat_shop">Shop Owner</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="categoryError">Please select a category</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">🎰 Let's Spin!</button>
+                </form>
+            </div>
+
+            <div class="wheel-container" id="wheelContainer">
+                <div class="wheel-wrapper">
+                    <div class="wheel-pointer">👇</div>
+                    <canvas id="spinWheel"></canvas>
+                </div>
+                <button class="spin-button" id="spinButton">
+                    <span>TAP TO SPIN</span>
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 15px; color: #43e97b; font-weight: 600;">Preparing your wheel...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-emoji" id="resultEmoji">🎁</div>
+            <h2 class="result-title" id="resultTitle">Congratulations!</h2>
+            <p class="result-prize" id="resultPrize">You won something amazing!</p>
+            <button class="close-btn" id="closeBtn">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        // Start Overlay & Full Screen Logic
+        const startOverlay = document.getElementById('startOverlay');
+        const startBtn = document.getElementById('startBtn');
+
+        startBtn.addEventListener('click', () => {
+            // Request full screen
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+            // Hide overlay
+            startOverlay.style.display = 'none';
+        });
+
+        const prizes = [
+            { 
+                name: 'Chilli Chicken Junior Pack',
+                emoji: '🍲', 
+                image: 'images/junior-chilli-chicken.png', 
+                color: '#FF6B6B', // Red
+                percentage: 10 
+            },
+            { 
+                name: 'Sambar Junior Pack', 
+                emoji: '🧡', 
+                image: 'images/junior-sambar.png',  
+                color: '#4ECDC4', // Teal
+                percentage: 10 
+            },
+            { 
+                name: 'Kashmiri Chilli Junior Pack', 
+                emoji: '🔥', 
+                image: 'images/junior-kashmiri.png',  
+                color: '#FF8A65', // Orange
+                percentage: 10 
+            },
+            { 
+                name: '50g Idly Chutney Powder', 
+                emoji: '🟢', 
+                image: 'images/50g-idly-chutney.png', 
+                color: '#81C784', // Green
+                percentage: 10 
+            },
+            { 
+                name: '50g Sambar Powder', 
+                emoji: '🍲', 
+                image: 'images/50g-sambar.png',  
+                color: '#FFE66D', // Yellow
+                percentage: 10 
+            },
+            { 
+                name: '50g Kulambu Chilli Masala', 
+                emoji: '🎈', 
+                image: 'images/50g-kulambu.png',  
+                color: '#95E1D3', // Light Teal
+                percentage: 10 
+            },
+            { 
+                name: 'Veg Combo 50g (2) ', 
+                emoji: '🎁', 
+                image: 'images/veg-combo.png',  
+                color: '#BA68C8', // Purple
+                percentage: 10 
+            },
+            { 
+               name: 'Non-Veg Combo 50g (2)', 
+               emoji: '✨', 
+               image: 'images/non-veg-combo.png',
+               color: '#FDD835', // Gold
+               percentage: 10 
+            },
+            { 
+                name: 'Mini Jumbo Combo Packs', 
+                emoji: '🧧', 
+                image: 'images/jumbo-pack.png', // MAKE SURE THIS IMAGE EXISTS
+                color: '#EF5350', // Darker Red
+                percentage: 10 
+            },
+            { 
+                name: 'Jumbo Combo Packs', 
+                emoji: '🥡', 
+                image: 'images/jumbo-pack.png', // MAKE SURE THIS IMAGE EXISTS
+                color: '#66BB6A', // Darker Green
+                percentage: 10 
+            }
+        ];
+
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywkY3hXRnNfvnpBOp7n-QTjOeF0PDahdiRilyF6OS7Es4yjuwBe6U3nKiZrLLm16D9/exec';
+        const STORAGE_KEY = 'spinWheelParticipants';
+        
+        function getParticipants() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function hasParticipated(phoneNumber) {
+            const participants = getParticipants();
+            return participants.hasOwnProperty(phoneNumber);
+        }
+
+        function addParticipant(phoneNumber, category) {
+            const participants = getParticipants();
+            participants[phoneNumber] = {
+                category: category,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(participants));
+        }
+
+        // PASTE THIS INSIDE THE <script> TAG
+        async function sendToGoogleSheets(phoneNumber, category, prize) {
+            try {
+                const timestamp = new Date().toLocaleString('en-IN', { 
+                    timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+                
+                // DATA TO SEND
+                const data = { 
+                    phoneNumber: phoneNumber, 
+                    category: category, 
+                    prize: prize, 
+                    timestamp: timestamp,
+                    game: 'Spin Wheel' // <--- THIS IS THE NEW PART
+                };
+
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return true;
+            } catch (error) {
+                console.error('Error:', error);
+                return false;
+            }
+        }
+
+        // Canvas setup
+        const canvas = document.getElementById('spinWheel');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 450;
+        canvas.height = 450;
+
+        let currentRotation = 0;
+        let isSpinning = false;
+        
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 10;
+            const numPrizes = prizes.length;
+            
+            // --- FIXED: EQUAL SLICES ---
+            // Visual Slices are always 360 divided by number of prizes
+            const sliceAngle = (2 * Math.PI) / numPrizes;
+
+            for (let i = 0; i < numPrizes; i++) {
+                const prize = prizes[i];
+                const startAngle = i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                // Draw slice
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = prize.color;
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Draw Text & Emoji
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                const midAngle = startAngle + sliceAngle / 2;
+                ctx.rotate(midAngle);
+
+                // Emoji
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(prize.emoji, radius * 0.85, 8); 
+
+                // Text
+                ctx.font = 'bold 12px "Segoe UI", Arial, sans-serif';
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'right';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 2;
+                
+                // Truncate long names slightly if needed, or wrap
+                const words = prize.name.split(' ');
+                if (words.length > 2) {
+                     ctx.fillText(words.slice(0, 2).join(' '), radius * 0.75, -5);
+                     ctx.fillText(words.slice(2).join(' '), radius * 0.75, 12);
+                } else {
+                     ctx.fillText(prize.name, radius * 0.75, 5);
+                }
+
+                ctx.restore();
+            }
+
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = '#43e97b';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#43e97b';
+            ctx.textAlign = 'center';
+            ctx.fillText('SPIN', centerX, centerY + 8);
+        }
+
+        // Draw immediately
+        drawWheel();
+
+        // Form Logic
+        const form = document.getElementById('participantForm');
+        const phoneInput = document.getElementById('phone');
+        const phoneError = document.getElementById('phoneError');
+        const categoryError = document.getElementById('categoryError');
+        const categoryInputs = document.querySelectorAll('input[name="category"]');
+
+        categoryInputs.forEach(input => {
+            input.addEventListener('change', () => categoryError.classList.remove('show'));
+        });
+
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 10) this.value = this.value.slice(0, 10);
+            phoneError.classList.remove('show');
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let isValid = true;
+            const selectedCategory = document.querySelector('input[name="category"]:checked');
+
+            if (phoneInput.value.length !== 10) {
+                phoneError.textContent = 'Please enter a valid 10-digit phone number';
+                phoneError.classList.add('show');
+                isValid = false;
+            } else if (hasParticipated(phoneInput.value)) {
+                phoneError.textContent = 'This number has already played!';
+                phoneError.classList.add('show');
+                isValid = false;
+            }
+
+            if (!selectedCategory) {
+                categoryError.classList.add('show');
+                isValid = false;
+            }
+
+            if (isValid) {
+                window.currentParticipant = {
+                    phone: phoneInput.value,
+                    category: selectedCategory.value
+                };
+                document.getElementById('formContainer').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('wheelContainer').style.display = 'block';
+                }, 1000);
+            }
+        });
+
+        // --- NEW "DECK OF CARDS" LOGIC (EXACT COUNTS, NO LUCK) ---
+        const POOL_KEY = 'maamis_prize_pool_SPIN_NEW';
+
+        // 1. Create the deck of 100 cards based on percentages
+        function createPrizePool() {
+            let pool = [];
+            prizes.forEach((prize, index) => {
+                // If percentage is 20, add this prize 20 times
+                for(let i = 0; i < prize.percentage; i++) {
+                    pool.push(index);
+                }
+            });
+            
+            // Shuffle the deck
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            
+            return pool;
+        }
+
+        // 2. Get the current deck from storage, or make a new one
+        function getPrizePool() {
+            const stored = localStorage.getItem(POOL_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (parsed.length > 0) return parsed;
+            }
+            return createPrizePool();
+        }
+
+        // 3. Pick a card and REMOVE it from the deck
+        function getWeightedRandomPrize() { 
+            let pool = getPrizePool();
+            
+            // Take the last card from the deck
+            const winningIndex = pool.pop(); 
+            
+            // Save the smaller deck back to storage
+            localStorage.setItem(POOL_KEY, JSON.stringify(pool));
+            
+            return winningIndex;
+        }
+
+        const spinButton = document.getElementById('spinButton');
+        const resultModal = document.getElementById('resultModal');
+        const resultEmoji = document.getElementById('resultEmoji');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultPrize = document.getElementById('resultPrize');
+        const closeBtn = document.getElementById('closeBtn');
+
+        spinButton.addEventListener('click', function() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinButton.disabled = true;
+
+            const targetIndex = getWeightedRandomPrize();
+            const wonPrize = prizes[targetIndex];
+            
+            // --- FIXED: ROTATION LOGIC FOR EQUAL SLICES ---
+            // 1. Calculate slice angle in degrees
+            const sliceAngle = 360 / prizes.length;
+            
+            // 2. Find the center angle of the winning slice
+            const sliceCenter = (targetIndex * sliceAngle) + (sliceAngle / 2);
+            
+            // 3. Calculate rotation needed to align slice center with top (270deg)
+            let targetRotation = 270 - sliceCenter;
+            
+            // Normalize to positive angle
+            while (targetRotation < 0) targetRotation += 360;
+            
+            // 4. Add extra spins
+            const extraSpins = 5 + Math.floor(Math.random() * 3);
+            const totalRotation = (360 * extraSpins) + targetRotation;
+            
+            // 5. Ensure smooth animation from current position
+            const currentMod = currentRotation % 360;
+            const finalRot = currentRotation + (360 * extraSpins) + (targetRotation - currentMod);
+            
+            canvas.style.transform = `rotate(${finalRot}deg)`;
+            currentRotation = finalRot;
+
+            setTimeout(() => {
+                if (window.currentParticipant) {
+                    sendToGoogleSheets(
+                        window.currentParticipant.phone,
+                        window.currentParticipant.category,
+                        wonPrize.name
+                    );
+                }
+
+                // Show Image in Result only
+                if (wonPrize.image) {
+                    resultEmoji.innerHTML = '<img src="' + wonPrize.image + '" style="width:120px;height:120px;object-fit:contain;">';
+                } else {
+                    resultEmoji.textContent = wonPrize.emoji;
+                }
+                
+                resultPrize.textContent = wonPrize.name;
+                resultTitle.textContent = (wonPrize.name.includes('Glad') || wonPrize.name.includes('Happy')) 
+                    ? 'Thanks for playing!' 
+                    : 'Congratulations! 🎊';
+
+                resultModal.style.display = 'flex';
+                createConfetti();
+                
+                isSpinning = false;
+                spinButton.disabled = false;
+            }, 4500);
+        });
+
+       // NEW CODE (Goes back to 3 Games Home Page)
+closeBtn.addEventListener('click', function() {
+    // Redirect to the main dashboard
+    window.location.href = 'index.html'; 
+});
+
+        function createConfetti() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+    </script>
+</body>
+</html>

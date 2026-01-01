@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tap & Win!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Golden Turmeric Gradient */
+            background: linear-gradient(135deg, #bbdb72 0%, #78ffd6 100%);
+            height: 100vh; /* Fixed height for tablet */
+            width: 100vw;
+            overflow: hidden; /* No scrolling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px; 
+            height: 85%;
+            max-height: 100vh;
+            background: #f5f5dc; /* Cream Background */
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER WITH LOGO INSIDE --- */
+        .header {
+            /* Spicy Red Gradient */
+            background: linear-gradient(135deg, #5cc780 0%, #96f1e1 100%);
+            padding: 5px;
+            text-align: center;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .company-logo {
+            width: 250px; /* Smaller logo to save space */
+            height: auto;
+            display: block; 
+            margin: 0 auto 5px;
+        }
+         .header::before {
+            content: '✨';
+            left:80px;
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.2;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header::after {
+            content: '🎁';
+            position: absolute;
+            right: 70px;
+            font-size: 50px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite 1.5s;
+        }
+          @keyframes float {
+            0%, 100% { transform: translateY(25px); }
+            50% { transform: translateY(-50px); }
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- CONTENT AREA --- */
+        .content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Form Styles */
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #ffffff;
+            font-weight: 600;
+        }
+
+        /* --- RADIO BUTTONS (Single Row) --- */
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px 2px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 100%;
+            color: #555;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        /* Selected State (Red Theme) */
+        .radio-option input[type="radio"]:checked + label {
+            background: #ffebee;
+            border-color: #ef473a;
+            color: #c62828;
+            box-shadow: 0 2px 5px rgba(239, 71, 58, 0.2);
+        }
+        /* ---------------------------------- */
+
+        .error-message {
+            color: #ef473a;
+            font-size: 12px;
+            margin-top: 3px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #5cc780 0%, #015143 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(239, 71, 58, 0.3);
+            margin-top: 5px;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .instruction {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .instruction h2 { font-size: 18px; color: #d84315; margin: 0 0 2px 0; }
+        .instruction p { font-size: 13px; color: #666; margin: 0; }
+
+        /* --- 3x3 COMPACT SQUARE GRID --- */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Gap and Size adjusted to fit tablet screens without scrolling */
+            gap: 8px;
+            width: 100%;
+            max-width: 400px; /* Reduced max-width for tighter grid */
+            aspect-ratio: 1/1; /* Keeps the whole grid roughly square */
+            margin: 0 auto;
+        }
+
+        .card {
+            aspect-ratio: 1/1; /* SQUARE CARDS */
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+        .card.disabled { pointer-events: none; opacity: 0.5; }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .card-front::before {
+            content: '?';
+            font-size: 30px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            padding: 2px;
+            border: 2px solid #ef473a;
+        }
+
+        .card-image {
+            width: 80%;
+            height: 60%;
+            object-fit: contain;
+        }
+
+        .card-text {
+            font-size: 9px;
+            font-weight: 700;
+            text-align: center;
+            color: #333;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        /* Result Modal */
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+            padding: 20px;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+
+        .result-image { max-width: 150px; height: auto; margin-bottom: 15px; }
+        .result-title { font-size: 24px; color: #333; margin-bottom: 5px; font-weight: bold; }
+        .result-prize { font-size: 20px; color: #cb2d3e; margin-bottom: 20px; font-weight: 600; }
+
+        .close-btn {
+            background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+            color: white; border: none; padding: 12px 30px;
+            font-size: 16px; font-weight: bold; border-radius: 25px;
+            cursor: pointer; width: 100%;
+        }
+
+        .loading { display: none; text-align: center; }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #ef473a;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .confetti {
+            position: fixed; width: 10px; height: 10px; background: #f093fb;
+            position: absolute; animation: confetti-fall 3s linear forwards;
+        }
+        @keyframes confetti-fall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <a href="index.html" style="position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 24px; z-index: 10;">🏠</a>
+            <img src="images/company-logo.png" alt="Company Logo" class="company-logo">
+            <h1>🎴 Tap & Win!</h1>
+        </div>
+
+        <div class="content">
+            <div class="form-container" id="formContainer">
+                <form id="participantForm">
+                    <div class="form-group">
+                        <label for="phone">📱 Enter Your Mobile Number *</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter 10-digit number" inputmode="numeric" maxlength="10" required>
+                        <div class="error-message" id="phoneError">Invalid number</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>👤 I am a *</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="cat_consumer" name="category" value="consumer" required>
+                                <label for="cat_consumer">Consumer</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cat_agent" name="category" value="agent">
+                                <label for="cat_agent">Distributor/Agent</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cat_rest" name="category" value="restaurant">
+                                <label for="cat_rest">Restaurant Owner</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="categoryError">Select a category</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">🎴 REVEAL CARDS</button>
+                </form>
+            </div>
+
+            <div class="cards-container" id="cardsContainer">
+                <div class="instruction">
+                    <h2>Tap a card!</h2>
+                    <p>Find your lucky prize</p>
+                </div>
+
+                <div class="cards-grid" id="cardsGrid">
+                    </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 10px; color: #ef473a; font-weight: 600;">Shuffling...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <img id="resultImage" class="result-image" style="display: none;" alt="Prize">
+            <div class="result-emoji" id="resultEmoji">🎁</div>
+            <h2 class="result-title" id="resultTitle">Congratulations!</h2>
+            <p class="result-prize" id="resultPrize">Prize Name</p>
+            <button class="close-btn" id="closeBtn">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywkY3hXRnNfvnpBOp7n-QTjOeF0PDahdiRilyF6OS7Es4yjuwBe6U3nKiZrLLm16D9/exec';
+        
+        const prizes = [
+            { name: '500g Sambar', percentage: 10, isProduct: true, image: 'images/500g-Sambar.png' },
+            { name: '200g Kulambu Chilli Masala', percentage: 10, isProduct: true, image: 'images/200g-kulambu-chilli.png' },
+            { name: '50g Chilli Powder', percentage: 10, isProduct: true, image: 'images/50g-chilli.png' },
+            { name: '50g Idly Chutney', percentage: 10, isProduct: true, image: 'images/50g-idly-chutney.png' },
+            { name: '50g Sambar Powder', percentage: 10, isProduct: true, image: 'images/50g-sambar.png' },
+            { name: 'Rs.10 Junior Pack', percentage: 10, isProduct: true, image: 'images/company-logo.png' },
+            { name: 'Rs.10 Junior Pack', percentage: 20, isProduct: true, image: 'images/company-logo.png' },
+            { name: 'Rs.10 Junior Pack', percentage: 10, isProduct: true, image: 'images/company-logo.png' },
+            { name: 'Rs.10 Junior Pack', percentage: 10, isProduct: true, image: 'images/company-logo.png' }
+        ];
+
+        const STORAGE_KEY = 'spinWheelParticipants';
+        
+        function getParticipants() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function hasParticipated(phoneNumber) {
+            const participants = getParticipants();
+            return participants.hasOwnProperty(phoneNumber);
+        }
+
+        function addParticipant(phoneNumber, category) {
+            const participants = getParticipants();
+            participants[phoneNumber] = { category: category, timestamp: new Date().toISOString() };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(participants));
+        }
+
+       // REPLACE THE OLD sendToGoogleSheets FUNCTION WITH THIS:
+        async function sendToGoogleSheets(phoneNumber, category, prize) {
+            try {
+                const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                
+                // --- THIS IS THE PART FROM YOUR IMAGE ---
+                const data = { 
+                    phoneNumber: phoneNumber, 
+                    category: category, 
+                    prize: prize, 
+                    timestamp: timestamp,
+                    game: 'Tap & Win' // <--- Added the Game Name here
+                };
+                // ----------------------------------------
+
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return true;
+            } catch (error) { return false; }
+        }
+
+        const form = document.getElementById('participantForm');
+        const phoneInput = document.getElementById('phone');
+        const phoneError = document.getElementById('phoneError');
+        const categoryError = document.getElementById('categoryError');
+        const categoryInputs = document.querySelectorAll('input[name="category"]');
+
+        categoryInputs.forEach(input => {
+            input.addEventListener('change', () => categoryError.classList.remove('show'));
+        });
+
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 10) this.value = this.value.slice(0, 10);
+            phoneError.classList.remove('show');
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let isValid = true;
+            const selectedCategory = document.querySelector('input[name="category"]:checked');
+
+            if (phoneInput.value.length !== 10) {
+                phoneError.classList.add('show'); isValid = false;
+            } else if (hasParticipated(phoneInput.value)) {
+                phoneError.textContent = 'Already played!'; phoneError.classList.add('show'); isValid = false;
+            }
+
+            if (!selectedCategory) { categoryError.classList.add('show'); isValid = false; }
+
+            if (isValid) {
+                addParticipant(phoneInput.value, selectedCategory.value);
+                window.currentParticipant = { phone: phoneInput.value, category: selectedCategory.value };
+                
+                document.getElementById('formContainer').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+
+                setTimeout(() => {
+                    generateCards();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('cardsContainer').style.display = 'flex'; // Use flex to center
+                }, 1000);
+            }
+        });
+
+        // --- NEW "DECK OF CARDS" LOGIC FOR TAP & WIN ---
+        const POOL_KEY = 'maamis_prize_pool_v2';
+
+        // 1. Create the deck
+        function createPrizePool() {
+            let pool = [];
+            prizes.forEach((prize, index) => {
+                for(let i = 0; i < prize.percentage; i++) {
+                    pool.push(index);
+                }
+            });
+            // Shuffle
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool;
+        }
+
+        // 2. Get deck from storage
+        function getPrizePool() {
+            const stored = localStorage.getItem(POOL_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (parsed.length > 0) return parsed;
+            }
+            return createPrizePool();
+        }
+
+        // 3. THIS IS THE RENAMED FUNCTION FOR TAP.HTML
+        function selectPrizeByPercentage() { 
+            let pool = getPrizePool();
+            
+            // Take the last card
+            const winningIndex = pool.pop(); 
+            
+            // Save updated deck
+            localStorage.setItem(POOL_KEY, JSON.stringify(pool));
+            
+            return winningIndex;
+        }
+
+        function generateCards() {
+            const cardsGrid = document.getElementById('cardsGrid');
+            cardsGrid.innerHTML = '';
+            
+            const shuffledPrizes = [...prizes].sort(() => Math.random() - 0.5);
+
+            shuffledPrizes.forEach((prize) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                let cardBackContent = '';
+                if (prize.isProduct && prize.image) {
+                    cardBackContent = `
+                        <img src="${prize.image}" alt="${prize.name}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="card-emoji" style="display: none;">📦</div>
+                        <div class="card-text">${prize.name}</div>
+                    `;
+                } else {
+                    cardBackContent = `
+                        <div class="card-emoji">🎁</div>
+                        <div class="card-text">${prize.name}</div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-face card-front"></div>
+                        <div class="card-face card-back">
+                            ${cardBackContent}
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', function() {
+                    if (this.classList.contains('flipped') || this.classList.contains('disabled')) return;
+                    
+                    const winningPrizeIndex = selectPrizeByPercentage();
+                    const wonPrize = prizes[winningPrizeIndex];
+
+                    const cardBack = this.querySelector('.card-back');
+                    let wonContent = '';
+                    if (wonPrize.isProduct && wonPrize.image) {
+                        wonContent = `
+                            <img src="${wonPrize.image}" alt="${wonPrize.name}" class="card-image">
+                            <div class="card-text">${wonPrize.name}</div>
+                        `;
+                    } else {
+                        wonContent = `
+                            <div class="card-emoji">🎁</div>
+                            <div class="card-text">${wonPrize.name}</div>
+                        `;
+                    }
+                    cardBack.innerHTML = wonContent;
+
+                    this.classList.add('flipped');
+
+                    document.querySelectorAll('.card').forEach(c => {
+                        if (c !== this) c.classList.add('disabled');
+                    });
+
+                    if (window.currentParticipant) {
+                        sendToGoogleSheets(window.currentParticipant.phone, window.currentParticipant.category, wonPrize.name);
+                    }
+
+                    setTimeout(() => showResult(wonPrize), 800);
+                });
+
+                cardsGrid.appendChild(card);
+            });
+        }
+
+        const resultModal = document.getElementById('resultModal');
+        const resultImage = document.getElementById('resultImage');
+        const resultEmoji = document.getElementById('resultEmoji');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultPrize = document.getElementById('resultPrize');
+        const closeBtn = document.getElementById('closeBtn');
+
+        function showResult(prize) {
+            if (prize.isProduct && prize.image) {
+                resultImage.src = prize.image;
+                resultImage.style.display = 'block';
+                resultEmoji.style.display = 'none';
+            } else {
+                resultImage.style.display = 'none';
+                resultEmoji.style.display = 'block';
+                resultEmoji.textContent = '🎁';
+            }
+
+            resultPrize.textContent = prize.name;
+            resultTitle.textContent = 'Congratulations! 🎊';
+            resultModal.style.display = 'flex';
+            createConfetti();
+        }
+
+       // NEW CODE (Goes back to 3 Games Home Page)
+closeBtn.addEventListener('click', function() {
+    // Redirect to the main dashboard
+    window.location.href = 'index.html'; 
+});
+
+        function createConfetti() {
+            const colors = ['#cb2d3e', '#ef473a', '#ffd200', '#f7971e'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+    </script>
+</body>
+</html>
